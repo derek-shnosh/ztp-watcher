@@ -62,12 +62,12 @@ _**Use-case**_: Copy IOS image .bin file to C2960X switch post FreeZTP provision
      > **watch_dir** must match path from the `ztp set logging merged-config-to-custom-file` path.
 
      ```yaml
-     logfile: '/etc/ztp/logs/ztpwatcher.log'
-     watch_dir: '/etc/ztp/logs/merged/'
-     tftpaddr: '172.17.251.251'
-     imgfile: 'c2960x-universalk9-mz.152-4.E8.bin'
-     username: 'cisco'
-     password: 'cisco'
+     logfile: /etc/ztp/logs/ztpwatcher.log
+     watch_dir: /etc/ztp/logs/merged/
+     tftpaddr: 172.17.251.251
+     imgfile: c2960x-universalk9-mz.152-4.E8.bin
+     username: cisco
+     password: cisco
      ```
 
 5. Copy **.service** file to **/etc/systemd/system/**, then enable and start it.
