@@ -1,0 +1,13 @@
+[Unit]
+Description=FreeZTP Provisioning Watcher
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c 'cd /var/git/ztp-watcher; python3 ztp-watcher.py'
+WorkingDirectory=/var/git/ztp-watcher/
+Environment=PYTHONUNBUFFERED=1
+Type=simple
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
