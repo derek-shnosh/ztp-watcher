@@ -1,0 +1,5 @@
+*.log
+ztpconfig.yaml
+test.py
+
+__pycache__
