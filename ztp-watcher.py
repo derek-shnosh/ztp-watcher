@@ -103,14 +103,14 @@ class Handler(FileSystemEventHandler):
             config_commands=bootcmds_list
         )
         std_log(bootvar)
-        Logger(f'{hostname} boot variable has been set to `flash:{imgfile}`, writing config.')
+        Logger(f'{hostname} boot variable has been set, writing config.')
 
         writemem = nr.run(
             task=netmiko_send_command,
             command_string='write mem',
         )
         std_log(writemem)
-        Logger(f'{hostname} configuration written, ready to reload/power off.')
+        Logger(f'{hostname} config written, ready to reload/power off.')
 
     def on_created(self, event):
 
