@@ -149,8 +149,7 @@ class Handler(FileSystemEventHandler):
         )
         # std_log(writemem)
         Logger(f'{hostname}: Config written, ready to reload/power off.')
-
-        nr.close_connections
+        nr.close_connections()
 
 
 if __name__ == '__main__':
