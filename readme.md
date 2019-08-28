@@ -19,7 +19,7 @@ _**Use-case**_: Copy IOS image .bin file to C2960X switch post FreeZTP provision
    _**Full custom log file config example...**_
 
    ```bash
-   ztp set logging merged-config-to-custom-file '/etc/ztp/logs/merged/{{association}}/{{keystore_id}}_{{ipaddr}}_{{idarray|join("-")}}_merged.cfg'
+   ztp set logging merged-config-to-custom-file '/etc/ztp/logs/merged/{{keystore_id}}_{{ipaddr}}_{{idarray|join("-")}}_merged.cfg'
    ```
 
    \*_**Suggestion**_: Disable logging merged configs to the main log file via;
