@@ -1,6 +1,5 @@
 *.log
 ztpconfig.yaml
-test.py
-backup*.py
+misc
 
 __pycache__
