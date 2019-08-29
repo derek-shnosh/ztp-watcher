@@ -14,12 +14,26 @@ from nornir import InitNornir
 from nornir.plugins.tasks.networking import netmiko_send_command, netmiko_send_config
 
 
+# Open the `ztpconfig.yaml` file to parse configuration settings.
+with open('./ztpconfig.yaml', 'r') as f:
+    config = yaml.safe_load(f)
+
+logfile = config['logfile']
+watch_dir = config['watch_dir']
+tftpaddr = config['tftpaddr']
+imgfile = config['imgfile']
+username = config['username']
+password = config['password']
+
+
+# `std_log` function to parse nr.run() output.
 def std_log(agg_result):
     for k, multi_result in agg_result.items():
         for result_obj in multi_result:
             Logger(f'{k}\n{result_obj.result}')
 
 
+# `Logger` class to handle logging messages to file.
 class Logger:
 
     def __init__(self, logdata):
@@ -30,6 +44,7 @@ class Logger:
         logging.info(f'-- {logdata}')
 
 
+# `Watcher` class to watch the specified directory for new files.
 class Watcher:
 
     def __init__(self):
@@ -55,8 +70,13 @@ class Watcher:
             Logger('Error.\n')
 
 
+# `Handler` class to validate SSH reachability and initiate .bin file firmware
+# update to provisioned switches.
 class Handler(FileSystemEventHandler):
 
+    # `on_created` function uses threading to start the update.
+    # When a file is created, the filename is parsed for hostname and IP address.
+    # These values are passed to the `test_ssh` function to validate SSH reachability.
     def on_created(self, event):
 
         ignorefiles = ['.swp', '.save']
@@ -73,6 +93,10 @@ class Handler(FileSystemEventHandler):
                     hostname, hostaddr))
                 x.start()
 
+    # `test_ssh` function validates that the IP address parsed from the `on_created`
+    # function will accept SSH connections (auth attempts are not yet made).
+    # The hostname and IP address are passed to the `os_upgrade` function to update
+    # the provisioned switches.
     def test_ssh(self, hostname, hostaddr, port=22):
 
         initialwait = 15
@@ -106,6 +130,8 @@ class Handler(FileSystemEventHandler):
                 self.os_upgrade(hostname, hostaddr)
                 break
 
+    # `os_upgrade` function copies the .bin image via TFTP, sets the boot variable,
+    # and writes the config.
     def os_upgrade(self, hostname, hostaddr):
 
         Logger(f'{hostname}: Connecting via SSH and starting TFTP image transfer.')
@@ -154,16 +180,5 @@ class Handler(FileSystemEventHandler):
 
 
 if __name__ == '__main__':
-
-    with open('./ztpconfig.yaml', 'r') as f:
-        config = yaml.safe_load(f)
-
-    logfile = config['logfile']
-    watch_dir = config['watch_dir']
-    tftpaddr = config['tftpaddr']
-    imgfile = config['imgfile']
-    username = config['username']
-    password = config['password']
-
     w = Watcher()
     w.run()
