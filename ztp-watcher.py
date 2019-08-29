@@ -108,7 +108,7 @@ class Handler(FileSystemEventHandler):
 
     def os_upgrade(self, hostname, hostaddr):
 
-        Logger(f'{hostname}: Starting TFTP image transfer.')
+        Logger(f'{hostname}: Connecting via SSH and starting TFTP image transfer.')
 
         nr = InitNornir(
             inventory={
