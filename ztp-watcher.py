@@ -80,7 +80,8 @@ class Handler(FileSystemEventHandler):
         attempts = 0
         maxattempts = 25
 
-        Logger(f'{hostname}: Attempting SSH to {hostaddr} in {initialwait}s.')
+        Logger(
+            f'{hostname}: Verifying SSH reachability to {hostaddr} in {initialwait}s.')
         time.sleep(initialwait)
 
         result = None
@@ -92,7 +93,7 @@ class Handler(FileSystemEventHandler):
             except Exception as e:
                 if attempts >= maxattempts:
                     Logger(
-                        f'{hostname}: SSH attempts exhausted ({maxattempts}); {e}.')
+                        f'{hostname}: SSH verification attempts exhausted ({maxattempts}); {e}.')
                     break
                 else:
                     time.sleep(retrywait)
@@ -101,7 +102,7 @@ class Handler(FileSystemEventHandler):
                 result = testconn
                 testconn.close()
                 Logger(
-                    f'{hostname}: SSH connection success after {attempts} attempt(s) -> copy image file.')
+                    f'{hostname}: SSH reachability verified after {attempts} attempt(s) -> copy image file.')
                 self.os_upgrade(hostname, hostaddr)
                 break
 
