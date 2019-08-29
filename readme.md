@@ -73,7 +73,7 @@ _**Use-case**_: Copy IOS image .bin file to C2960X switch post FreeZTP provision
 5. Copy **.service** file to **/etc/systemd/system/**, then enable and start it.
    
    ```bash
-   cp /{path}/ztp-watcher.service /etc/systemd/system/
+   sudo cp /var/git/ztp-watcher/ztp-watcher.service /etc/systemd/system/
    sudo systemctl enable ztp-watcher.service
    sudo systemctl start ztp-watcher.service
    ```
