@@ -102,7 +102,7 @@ class Handler(FileSystemEventHandler):
         initialwait = 15
         retrywait = 3
         attempts = 0
-        maxattempts = 25
+        maxattempts = 20
 
         Logger(
             f'{hostname}: Verifying SSH reachability to {hostaddr} in {initialwait}s.')
@@ -116,9 +116,9 @@ class Handler(FileSystemEventHandler):
                 testconn.connect((hostaddr, port))
             except Exception as e:
                 if attempts >= maxattempts:
+                    result = testconn
                     Logger(
                         f'{hostname}: SSH verification attempts exhausted ({maxattempts}); {e}.')
-                    break
                 else:
                     time.sleep(retrywait)
                     continue
@@ -128,7 +128,6 @@ class Handler(FileSystemEventHandler):
                 Logger(
                     f'{hostname}: SSH reachability verified after {attempts} attempt(s) -> copy image file.')
                 self.os_upgrade(hostname, hostaddr)
-                break
 
     # `os_upgrade` function copies the .bin image via TFTP, sets the boot variable,
     # and writes the config.
