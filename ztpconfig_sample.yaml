@@ -1,6 +1,13 @@
+# Where to store the log file.
 logfile: /etc/ztp/logs/ztpwatcher.log
+
+# Location of FreeZTP custom merged-config files
 watch_dir: /etc/ztp/logs/merged/
-tftpaddr: 172.17.251.251
-imgfile: c2960x-universalk9-mz.152-4.E8.bin
+
+# IP address of TFTP server hosting files and name of image file to copy.
+tftpaddr: 172.17.251.251                          
+imgfile: c2960x-universalk9-mz.152-4.E8.bin 
+
+# Username and password used to authenticate to switches.
 username: cisco
 password: cisco
