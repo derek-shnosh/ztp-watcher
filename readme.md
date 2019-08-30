@@ -38,22 +38,7 @@ _**Use-case**_: Copy IOS image .bin file to C2960X switch post FreeZTP provision
    sudo git clone {URL} /var/git/ztp-watcher
    ```
 
-2. Edit **ztp-watcher.service** systemd unit file with path.
-
-   ```bash
-   sudo nano /var/git/ztp-watcher/ztp-watcher.service
-   ```
-
-   - _**Edit `ExecStart` and `WorkingDirectory` paths accordingly**_
-
-     ```bash
-     ...
-     ExecStart=/bin/bash -c 'cd /var/git/ztp-watcher; python3 ztp-watcher.py'
-     WorkingDirectory=/var/git/ztp-watcher/
-     ...
-     ```
-
-3. Make a copy of **ztpconfig_sample.yaml** as **ztpconfig.yaml** and edit for environment.
+2. Make a copy of **ztpconfig_sample.yaml** as **ztpconfig.yaml** and edit for environment.
 
    ```bash
    sudo cp /var/git/ztp-watcher/ztpconfig_sample.yaml /var/git/ztp-watcher/ztpconfig.yaml
@@ -72,7 +57,22 @@ _**Use-case**_: Copy IOS image .bin file to C2960X switch post FreeZTP provision
      password: cisco
      ```
 
-5. Copy **.service** file to **/etc/systemd/system/**, then enable and start it.
+3. Edit **ztp-watcher.service** systemd unit file with path.
+
+   ```bash
+   sudo nano /var/git/ztp-watcher/ztp-watcher.service
+   ```
+
+   - _**Edit `ExecStart` and `WorkingDirectory` paths accordingly**_
+
+     ```bash
+     ...
+     ExecStart=/bin/bash -c 'cd /var/git/ztp-watcher; python3 ztp-watcher.py'
+     WorkingDirectory=/var/git/ztp-watcher/
+     ...
+     ```
+
+4. Copy **.service** file to **/etc/systemd/system/**, then enable and start it.
    
    ```bash
    sudo cp /var/git/ztp-watcher/ztp-watcher.service /etc/systemd/system/
