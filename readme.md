@@ -2,7 +2,7 @@
 
 Watches specified directory for [FreeZTP][freeztp] custom merged-config files which are created after a switch is successfully provisioned. File name is parsed for hostname and host IP address to initiate a TFTP transfer of the specified IOS image.
 
-> _TFTP preferred over SCP due to speed (include `ip tftp blocksize 8192`) and because FreeZTP has TFTP built-in so no additional services are required._
+> _TFTP preferred over SCP due to speed (include `ip tftp blocksize 8192` in the switch template) and because FreeZTP has TFTP built-in so no additional services are required._
 
 _**Use-case**_: Copy IOS image .bin file to C2960X switch post FreeZTP provisioning to avoid the auto-install function using a .tar file (lengthy process).
 
