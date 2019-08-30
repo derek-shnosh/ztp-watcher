@@ -8,6 +8,7 @@ import threading
 import logging
 import yaml
 import socket
+import re
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from nornir import InitNornir
@@ -28,7 +29,6 @@ password = config['password']
 
 # `Logger` class to handle logging messages to file.
 class Logger:
-
     def __init__(self, logdata):
         logging.basicConfig(format='%(asctime)s %(message)s',
                             datefmt='%Y/%m/%d %I:%M:%S %p',
@@ -40,7 +40,6 @@ class Logger:
 
 # `Watcher` class to watch the specified directory for new files.
 class Watcher:
-
     def __init__(self):
         self.observer = Observer()
 
@@ -65,7 +64,6 @@ class Watcher:
 # `Handler` class to validate SSH reachability and initiate .bin file firmware
 # update to provisioned switches.
 class Handler(FileSystemEventHandler):
-
     # `on_created` function uses threading to start the update.
     # When a file is created, the filename is parsed for hostname and IP address.
     # These values are passed to the `test_ssh` function to validate SSH reachability.
@@ -118,18 +116,17 @@ class Handler(FileSystemEventHandler):
                 result = testconn
                 testconn.close()
                 Logger(
-                    f'{hostname}: SSH reachability verified after {attempts} attempt(s) -> copy image file.')
+                    f'{hostname}: SSH reachability verified after {attempts} attempt(s) -> copy image file(?).')
                 self.os_upgrade(hostname, hostaddr)
 
     # `os_upgrade` function copies the .bin image via TFTP, sets the boot variable,
     # and writes the config.
     def os_upgrade(self, hostname, hostaddr):
 
-        # `std_log` function to parse nr.run() output, use for TS.
-        def std_log(agg_result):
+        def get_output(agg_result):
             for k, multi_result in agg_result.items():
                 for result_obj in multi_result:
-                    Logger(f'{k}\n{result_obj.result}')
+                    return result_obj.result
 
         # 'sw_log' function sends syslog messages to the switch.
         def sw_log(logmsg):
@@ -156,8 +153,6 @@ class Handler(FileSystemEventHandler):
             )
             return(result)
 
-        Logger(f'{hostname}: Connecting via SSH and starting TFTP image transfer.')
-
         nr = InitNornir(
             inventory={
                 'options': {
@@ -173,27 +168,43 @@ class Handler(FileSystemEventHandler):
             }
         )
 
-        sw_log('Starting .bin image transfer via TFTP.')
-        copystart = time.time()
-        copyfile = send_cmd(f'copy tftp://{tftpaddr}/{imgfile} flash:')
-        copyduration = round(time.time() - copystart)
-        sw_log('Image transfer complete.')
-        Logger(
-            f'{hostname}: Image transfer completed after {copyduration}s -> set boot variable.')
-        # std_log(copyfile)                                   # Uncomment for TS
+        Logger(f'{hostname}: Connecting via SSH to check for image file on switch.')
+
+        checkimg = send_cmd(f'dir flash:{imgfile}')
+        output = get_output(checkimg)
+        output = re.split(r'Directory of.*', output, flags=re.M)[1]
+        if imgfile in output:
+            Logger(f'{hostname}: Image file already present, skipping transfer.')
+            sw_log(
+                f'Image file already present ({imgfile}), skipping transfer.')
+        else:
+            Logger(f'{hostname}: Image file not found, starting TFTP transfer.')
+            sw_log(
+                f'Image file not found ({imgfile}), starting image transfer via TFTP.')
+            copystart = time.time()
+            copyfile = send_cmd(f'copy tftp://{tftpaddr}/{imgfile} flash:')
+            copyduration = round(time.time() - copystart)
+            sw_log('Image transfer complete.')
+            Logger(
+                f'{hostname}: Image transfer completed after {copyduration}s -> set boot variable.')
+            result = get_output(copyfile)
+            # Logger(result)                                  # Uncomment for TS
 
         sw_log('Setting boot variable and writing config.')
         bootcmds = f'default boot sys\nboot system flash:{imgfile}'
         bootcmds_list = bootcmds.splitlines()
         bootvar = send_config(bootcmds_list)
         Logger(f'{hostname}: Boot variable set -> write config.')
-        # std_log(bootvar)                                    # Uncomment for TS
+        result = get_output(bootvar)
+        # Logger(result)                                      # Uncomment for TS
 
         writemem = send_cmd('write mem')
         Logger(f'{hostname}: Config written, ready to reload/power off.')
-        nr.close_connections()
         sw_log('Config written, ready to reload/power off.')
-        # std_log(writemem)                                   # Uncomment for TS
+        result = get_output(writemem)
+        # Logger(result)                                      # Uncomment for TS
+
+        nr.close_connections()
 
 
 if __name__ == '__main__':
