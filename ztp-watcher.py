@@ -184,9 +184,9 @@ class Handler(FileSystemEventHandler):
             copystart = time.time()
             copyfile = send_cmd(f'copy tftp://{tftpaddr}/{imgfile} flash:')
             copyduration = round(time.time() - copystart)
-            sw_log('Image transfer complete.')
             Logger(
                 f'{hostname}: Image transfer completed after {copyduration}s -> set boot variable.')
+            sw_log('Image transfer complete.')
             result = get_output(copyfile)
             # Logger(result)                                  # Uncomment for TS
 
