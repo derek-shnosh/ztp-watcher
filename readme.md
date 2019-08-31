@@ -1,4 +1,4 @@
-# ZTP Provisioning Watcher
+# (Free)ZTP Watcher
 
 Watches specified directory for [FreeZTP][freeztp] custom merged-config files which are created after a switch is successfully provisioned. File name is parsed for hostname and host IP address to initiate a TFTP transfer of the specified IOS image.
 
