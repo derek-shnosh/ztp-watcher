@@ -4,7 +4,11 @@ Watches specified directory for [FreeZTP][freeztp] custom merged-config files wh
 
 > _TFTP preferred over SCP due to speed (include `ip tftp blocksize 8192` in the switch template) and because FreeZTP has TFTP built-in so no additional services are required._
 
-_**Use-case**_: Copy IOS image .bin file to C2960X switch post FreeZTP provisioning to avoid the auto-install function using a .tar file (lengthy process).
+_**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP provisioning to avoid the auto-install function using a .tar file (lengthy process).
+
+![screenshot-cisco-ref][ss-cisco-ref]
+
+[Source][cisco-doc]
 
 ## Considerations
 
@@ -92,3 +96,5 @@ _**Use-case**_: Copy IOS image .bin file to C2960X switch post FreeZTP provision
 
 
 [freeztp]: https://github.com/PackeTsar/freeztp/
+[cisco-doc]: https://www.cisco.com/c/en/us/td/docs/solutions/Enterprise/Plug-and-Play/release/notes/pnp-release-notes16.html#pgfId-206873
+[ss-cisco-ref]: assets/images/cisco-ref.png
