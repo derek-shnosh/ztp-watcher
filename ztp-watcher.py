@@ -21,6 +21,7 @@ with open('./ztpconfig.yaml', 'r') as f:
 
 logfile = config['logfile']
 watch_dir = config['watch_dir']
+ssh_method = config['ssh_method']
 tftpaddr = config['tftpaddr']
 imgfile = config['imgfile']
 username = config['username']
@@ -94,8 +95,10 @@ class Handler(FileSystemEventHandler):
         attempts = 0
         maxattempts = 20
 
+        conn = hostname if ssh_method == 'dns' else hostaddr
+
         Logger(
-            f'{hostname}: Verifying SSH reachability to {hostaddr} in {initialwait}s.')
+            f'{hostname}: Verifying SSH reachability to {conn} in {initialwait}s.')
         time.sleep(initialwait)
 
         result = None
@@ -103,7 +106,7 @@ class Handler(FileSystemEventHandler):
             try:
                 attempts += 1
                 testconn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                testconn.connect((hostaddr, port))
+                testconn.connect((conn, port))
             except Exception as e:
                 if attempts >= maxattempts:
                     result = testconn
@@ -172,8 +175,9 @@ class Handler(FileSystemEventHandler):
 
         checkimg = send_cmd(f'dir flash:{imgfile}')
         output = get_output(checkimg)
-        output = re.split(r'Directory of.*', output, flags=re.M)[1]
-        if imgfile in output:
+        # output = re.split(r'Directory of.*', output, flags=re.M)[1]
+        # if imgfile in output:
+        if '%Error' not in output:
             Logger(f'{hostname}: Image file already present, skipping transfer.')
             sw_log(
                 f'Image file already present ({imgfile}), skipping transfer.')
