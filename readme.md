@@ -29,7 +29,7 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
    ```
 
    \*_**Suggestion**_: Disable logging merged configs to the main log file via;
-   
+
     ```bash
      ztp set logging merged-config-to-mainlog disable
     ```
@@ -55,6 +55,7 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
      ```yaml
      logfile: /etc/ztp/logs/ztpwatcher.log
      watch_dir: /etc/ztp/logs/merged/
+     ssh_method: ip
      tftpaddr: 172.17.251.251
      imgfile: c2960x-universalk9-mz.152-4.E8.bin
      username: cisco
@@ -77,7 +78,7 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
      ```
 
 4. Copy **.service** file to **/etc/systemd/system/**, then enable and start it.
-   
+
    ```bash
    sudo cp /var/git/ztp-watcher/ztp-watcher.service /etc/systemd/system/
    sudo systemctl enable ztp-watcher.service
@@ -91,9 +92,6 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
 - https://pynet.twb-tech.com/blog/nornir/intro.html
 - https://pynet.twb-tech.com/blog/nornir/os-upgrade-p1.html
 - https://www.michaelcho.me/article/using-pythons-watchdog-to-monitor-changes-to-a-directory
-
-
-
 
 [freeztp]: https://github.com/PackeTsar/freeztp/
 [cisco-doc]: https://www.cisco.com/c/en/us/td/docs/solutions/Enterprise/Plug-and-Play/release/notes/pnp-release-notes16.html#pgfId-206873
