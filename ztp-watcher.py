@@ -67,7 +67,8 @@ class Watcher:
 class Handler(FileSystemEventHandler):
 
     # `on_created` function uses threading to start the update.
-    # When a file is created, the filename is parsed for hostname and IP address.
+    # When a file is created, the filename is parsed for hostname and IP address,
+    # and the file text is parsed for any IP address found in the configuration.
     # These values are passed to the `test_ssh` function to validate SSH reachability.
     def on_created(self, event):
 
@@ -82,20 +83,22 @@ class Handler(FileSystemEventHandler):
                 Logger(f'New file detected: {filename}')
                 hostname = filename.split('_')[0]
                 hostaddr = filename.split('_')[1]
-                x = threading.Thread(target=self.test_ssh, args=(hostname, hostaddr))
+                config = open(newfile).read()
+                ipaddr = re.search(r'ip.address.([\d\.]+)', config).group(1)
+                x = threading.Thread(target=self.test_ssh, args=(hostname, hostaddr, ipaddr))
                 x.start()
 
     # `test_ssh` function validates that the IP address parsed from the `on_created`
     # function will accept SSH connections (auth attempts are not yet made).
     # The hostname and IP address are passed to the `os_upgrade` function to update
     # the provisioned switches.
-    def test_ssh(self, hostname, hostaddr, port=22):
+    def test_ssh(self, hostname, hostaddr, ipaddr, port=22):
 
         initialwait = 15
         retrywait = 3
         attempts = 0
         maxattempts = 20
-        conn = hostname if ssh_method == 'dns' else hostaddr
+        conn = hostname if ssh_method == 'dns' else hostaddr if ssh_method == 'ip' else ipaddr
 
         Logger(f'{hostname}: Verifying SSH reachability to {conn} in {initialwait}s.')
         time.sleep(initialwait)
