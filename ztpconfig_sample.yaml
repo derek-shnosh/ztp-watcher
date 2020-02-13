@@ -9,7 +9,7 @@ ssh_method: ip
 
 # IP address of TFTP server hosting files and name of image file to copy.
 tftpaddr: 172.17.251.251                          
-imgfile: c2960x-universalk9-mz.152-4.E8.bin 
+imgfile: c2960x-universalk9-mz.152-4.E8.bin
 
 # Username and password used to authenticate to switches.
 username: cisco
