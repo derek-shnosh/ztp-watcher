@@ -65,6 +65,7 @@ class Watcher:
 # `Handler` class to validate SSH reachability and initiate .bin file firmware
 # update to provisioned switches.
 class Handler(FileSystemEventHandler):
+
     # `on_created` function uses threading to start the update.
     # When a file is created, the filename is parsed for hostname and IP address.
     # These values are passed to the `test_ssh` function to validate SSH reachability.
@@ -75,13 +76,13 @@ class Handler(FileSystemEventHandler):
         if event.is_directory:
             return None
         else:
-            newfile = event.src_path.rpartition('/')[2]
-            if not any(str in newfile for str in ignorefiles):
-                Logger(f'New file detected: {newfile}')
-                hostname = newfile.split('_')[0]
-                hostaddr = newfile.split('_')[1]
-                x = threading.Thread(target=self.test_ssh, args=(
-                    hostname, hostaddr))
+            newfile = event.src_path
+            filename = newfile.rpartition('/')[2]
+            if not any(str in filename for str in ignorefiles):
+                Logger(f'New file detected: {filename}')
+                hostname = filename.split('_')[0]
+                hostaddr = filename.split('_')[1]
+                x = threading.Thread(target=self.test_ssh, args=(hostname, hostaddr))
                 x.start()
 
     # `test_ssh` function validates that the IP address parsed from the `on_created`
@@ -94,12 +95,10 @@ class Handler(FileSystemEventHandler):
         retrywait = 3
         attempts = 0
         maxattempts = 20
-
         conn = hostname if ssh_method == 'dns' else hostaddr
 
         Logger(f'{hostname}: Verifying SSH reachability to {conn} in {initialwait}s.')
         time.sleep(initialwait)
-
         result = None
         while result is None:
             try:
@@ -119,7 +118,7 @@ class Handler(FileSystemEventHandler):
                 Logger(f'{hostname}: SSH reachability verified after {attempts} attempt(s) -> copy image file(?).')
                 self.os_upgrade(hostname, conn)
 
-    # `os_upgrade` function copies the .bin image via TFTP, sets the boot variable,
+    # `os_upgrade` function copies the .bin image via TFTP, sets the boot var,
     # and writes the config.
     def os_upgrade(self, hostname, conn):
 
@@ -153,6 +152,7 @@ class Handler(FileSystemEventHandler):
             )
             return(result)
 
+        # Initiate Nornir connection to switch.
         nr = InitNornir(
             inventory={
                 'options': {
@@ -168,16 +168,16 @@ class Handler(FileSystemEventHandler):
             }
         )
 
+        # Check flash: on switch for image file specified in ztpconfig.yaml.
         Logger(f'{hostname}: Connecting via SSH to check for image file on switch.')
-
         checkimg = send_cmd(f'dir flash:{imgfile}')
         output = get_output(checkimg)
-        # output = re.split(r'Directory of.*', output, flags=re.M)[1]
-        # if imgfile in output:
         if '%Error' not in output:
+            # Image file already in flash, skip transfer.
             Logger(f'{hostname}: Image file already present ({imgfile}), skipping transfer.')
             sw_log(f'Image file already present ({imgfile}), skipping transfer.')
         else:
+            # Image file not found, initiate TFTP transfer.
             Logger(f'{hostname}: Image file not found ({imgfile}), starting TFTP transfer.')
             sw_log(f'Image file not found ({imgfile}), starting image transfer via TFTP.')
             copystart = time.time()
@@ -188,11 +188,12 @@ class Handler(FileSystemEventHandler):
                 Logger(f'{hostname}: Image transfer completed after {copyduration}s -> set boot variable.')
                 sw_log('Image transfer complete.')
                 result = get_output(copyfile)
-                # Logger(result)                              # Uncomment for TS
             else:
                 Logger(f'{hostname}: ***Image transfer failed after {copyduration}s; {copystatus}')
                 sw_log('***Image transfer failed.')
+            # Logger(result)                                  # Uncomment for TS
 
+        # Set boot variable on switch.
         sw_log('Setting boot variable.')
         bootcmds = f'default boot sys\nboot system flash:{imgfile}'
         bootcmds_list = bootcmds.splitlines()
@@ -201,6 +202,7 @@ class Handler(FileSystemEventHandler):
         result = get_output(bootvar)
         # Logger(result)                                      # Uncomment for TS
 
+        # Write configuration to switch.
         sw_log('Writing configuration to startup.')
         writemem = send_cmd('write mem')
         Logger(f'{hostname}: Config written, ready to reload/power off.')
@@ -208,6 +210,7 @@ class Handler(FileSystemEventHandler):
         result = get_output(writemem)
         # Logger(result)                                      # Uncomment for TS
 
+        # Close nornir connection to switch.
         nr.close_connections()
 
 
