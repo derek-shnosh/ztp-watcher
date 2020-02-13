@@ -97,8 +97,7 @@ class Handler(FileSystemEventHandler):
 
         conn = hostname if ssh_method == 'dns' else hostaddr
 
-        Logger(
-            f'{hostname}: Verifying SSH reachability to {conn} in {initialwait}s.')
+        Logger(f'{hostname}: Verifying SSH reachability to {conn} in {initialwait}s.')
         time.sleep(initialwait)
 
         result = None
@@ -110,21 +109,19 @@ class Handler(FileSystemEventHandler):
             except Exception as e:
                 if attempts >= maxattempts:
                     result = testconn
-                    Logger(
-                        f'{hostname}: SSH verification attempts exhausted ({maxattempts}); {e}.')
+                    Logger(f'{hostname}: SSH verification attempts exhausted ({maxattempts}); {e}.')
                 else:
                     time.sleep(retrywait)
                     continue
             else:
                 result = testconn
                 testconn.close()
-                Logger(
-                    f'{hostname}: SSH reachability verified after {attempts} attempt(s) -> copy image file(?).')
-                self.os_upgrade(hostname, hostaddr)
+                Logger(f'{hostname}: SSH reachability verified after {attempts} attempt(s) -> copy image file(?).')
+                self.os_upgrade(hostname, conn)
 
     # `os_upgrade` function copies the .bin image via TFTP, sets the boot variable,
     # and writes the config.
-    def os_upgrade(self, hostname, hostaddr):
+    def os_upgrade(self, hostname, conn):
 
         def get_output(agg_result):
             for k, multi_result in agg_result.items():
@@ -161,7 +158,7 @@ class Handler(FileSystemEventHandler):
                 'options': {
                     'hosts': {
                         hostname: {
-                            'hostname': hostaddr,
+                            'hostname': conn,
                             'username': username,
                             'password': password,
                             'platform': 'ios'
@@ -178,23 +175,25 @@ class Handler(FileSystemEventHandler):
         # output = re.split(r'Directory of.*', output, flags=re.M)[1]
         # if imgfile in output:
         if '%Error' not in output:
-            Logger(f'{hostname}: Image file already present, skipping transfer.')
-            sw_log(
-                f'Image file already present ({imgfile}), skipping transfer.')
+            Logger(f'{hostname}: Image file already present ({imgfile}), skipping transfer.')
+            sw_log(f'Image file already present ({imgfile}), skipping transfer.')
         else:
-            Logger(f'{hostname}: Image file not found, starting TFTP transfer.')
-            sw_log(
-                f'Image file not found ({imgfile}), starting image transfer via TFTP.')
+            Logger(f'{hostname}: Image file not found ({imgfile}), starting TFTP transfer.')
+            sw_log(f'Image file not found ({imgfile}), starting image transfer via TFTP.')
             copystart = time.time()
             copyfile = send_cmd(f'copy tftp://{tftpaddr}/{imgfile} flash:')
             copyduration = round(time.time() - copystart)
-            Logger(
-                f'{hostname}: Image transfer completed after {copyduration}s -> set boot variable.')
-            sw_log('Image transfer complete.')
-            result = get_output(copyfile)
-            # Logger(result)                                  # Uncomment for TS
+            copystatus = get_output(copyfile)
+            if '%Error' not in copystatus:
+                Logger(f'{hostname}: Image transfer completed after {copyduration}s -> set boot variable.')
+                sw_log('Image transfer complete.')
+                result = get_output(copyfile)
+                # Logger(result)                              # Uncomment for TS
+            else:
+                Logger(f'{hostname}: ***Image transfer failed after {copyduration}s; {copystatus}')
+                sw_log('***Image transfer failed.')
 
-        sw_log('Setting boot variable and writing config.')
+        sw_log('Setting boot variable.')
         bootcmds = f'default boot sys\nboot system flash:{imgfile}'
         bootcmds_list = bootcmds.splitlines()
         bootvar = send_config(bootcmds_list)
@@ -202,6 +201,7 @@ class Handler(FileSystemEventHandler):
         result = get_output(bootvar)
         # Logger(result)                                      # Uncomment for TS
 
+        sw_log('Writing configuration to startup.')
         writemem = send_cmd('write mem')
         Logger(f'{hostname}: Config written, ready to reload/power off.')
         sw_log('Config written, ready to reload/power off.')
