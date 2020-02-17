@@ -1,10 +1,12 @@
-# Where to store the log file.
+# Where to store the log file for ZTP Watcher.
 logfile: /etc/ztp/logs/ztpwatcher.log
 
-# Location of FreeZTP custom merged-config files
+# Location of FreeZTP custom merged-config files, must match path from the 
+# `ztp set logging merged-config-to-custom-file` path.
 watch_dir: /etc/ztp/logs/merged/
 
 # Use `dns` or provisioning `ip` for SSH connection.
+# Use 'parse' to parse FreeZTP merged-config file.
 ssh_method: ip
 
 # IP address of TFTP server hosting files and name of image file to copy.

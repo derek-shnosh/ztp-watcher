@@ -98,7 +98,9 @@ class Handler(FileSystemEventHandler):
         retrywait = 3
         attempts = 0
         maxattempts = 10
-        conn = hostname if ssh_method == 'dns' else hostaddr if ssh_method == 'ip' else ipaddr
+        conn = (hostname if ssh_method == 'dns' else 
+                hostaddr if ssh_method == 'ip' else 
+                ipaddr if ssh_method == 'parse' else '')
 
         Logger(f'{hostname}: Verifying SSH reachability to {conn} in {initialwait}s.')
         time.sleep(initialwait)

@@ -44,13 +44,14 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
 
 2. Make a copy of **ztpconfig_sample.yaml** as **ztpconfig.yaml** and edit for environment.
 
+   > See **ztpconfig_sample.yaml* file for explanation of options.
+
    ```bash
    sudo cp /var/git/ztp-watcher/ztpconfig_sample.yaml /var/git/ztp-watcher/ztpconfig.yaml
    sudo nano /var/git/ztp-watcher/ztpconfig.yaml
    ```
 
    - _**Edit values accordingly**_
-     > **watch_dir** must match path from the `ztp set logging merged-config-to-custom-file` path.
 
      ```yaml
      logfile: /etc/ztp/logs/ztpwatcher.log
