@@ -95,6 +95,7 @@ class Handler(FileSystemEventHandler):
     def test_ssh(self, hostname, hostaddr, ipaddr, port=22):
 
         initialwait = 10
+        timeout = 7
         retrywait = 3
         attempts = 0
         maxattempts = 10
@@ -109,6 +110,7 @@ class Handler(FileSystemEventHandler):
             try:
                 attempts += 1
                 testconn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                testconn.settimeout(timeout)
                 testconn.connect((conn, port))
             except Exception as e:
                 if attempts >= maxattempts:
