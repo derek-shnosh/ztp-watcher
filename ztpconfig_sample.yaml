@@ -9,6 +9,10 @@ watch_dir: /etc/ztp/logs/merged/
 # Use 'parse' to parse FreeZTP merged-config file.
 ssh_method: ip
 
+# Enter 'True' if ./postcfg.txt has content to push post provisioning; other-
+# wise, 'False'.
+post_cfg: True
+
 # IP address of TFTP server hosting files and name of image file to copy.
 tftpaddr: 172.17.251.251                          
 imgfile: c2960x-universalk9-mz.152-4.E8.bin

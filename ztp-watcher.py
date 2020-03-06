@@ -22,10 +22,18 @@ with open('./ztpconfig.yaml', 'r') as f:
 logfile = config['logfile']
 watch_dir = config['watch_dir']
 ssh_method = config['ssh_method']
+post_cfg = config['post_cfg']
 tftpaddr = config['tftpaddr']
 imgfile = config['imgfile']
 username = config['username']
 password = config['password']
+
+if post_cfg:
+    with open('./postcfg.txt', 'r') as f:
+        postcfg = f.read()
+
+with open('./postcfg.txt', 'r') as f:
+    postcfg = f.read()
 
 
 # `Logger` class to handle logging messages to file.
@@ -197,21 +205,26 @@ class Handler(FileSystemEventHandler):
                 # Set boot variable on switch.
                 bootcmds = f'default boot sys\nboot system flash:{imgfile}'
                 bootcmds_list = bootcmds.splitlines()
-                bootvar = send_config(bootcmds_list)
+                send_config(bootcmds_list)
                 Logger(f'{hostname}: Boot variable set -> write config.')
                 sw_log('Boot variable set -> write config.')
-                # Logger(get_output(bootvar))                 # Uncomment for TS
             else:
                 Logger(f'{hostname}: ***Image transfer failed after {copyduration}s; {copystatus}')
                 sw_log('***Image transfer failed.')
-            # Logger(get_output(copyfile))                    # Uncomment for TS
+
+        # Send post-provisioning configuration commands to switch.
+        if post_cfg:
+            Logger(f'{hostname}: Sending post provisioning configurations.')
+            sw_log('Sending post provisioning configurations.')
+            postcfg_list = postcfg.splitlines()
+            send_config(postcfg_list)
+
 
         # Write configuration to switch.
         sw_log('Writing configuration to startup.')
-        writemem = send_cmd('write mem')
+        send_cmd('write mem')
         Logger(f'{hostname}: Config written, ready to reload/power off.')
         sw_log('Config written, ready to reload/power off.')
-        # Logger(get_output(writemem))                        # Uncomment for TS
 
         # Close nornir connection to switch.
         nr.close_connections()
