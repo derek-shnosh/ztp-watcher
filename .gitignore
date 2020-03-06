@@ -1,5 +1,6 @@
 *.log
 ztpconfig.yaml
 misc
+postcfg.txt
 
 __pycache__
