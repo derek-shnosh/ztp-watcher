@@ -11,7 +11,7 @@ ssh_method: ip
 
 # Enter 'True' if ./postcfg.txt has content to push post provisioning; other-
 # wise, 'False'.
-post_cfg: True
+post_cfg: False
 
 # IP address of TFTP server hosting files and name of image file to copy.
 tftpaddr: 172.17.251.251                          
