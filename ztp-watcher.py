@@ -16,35 +16,45 @@ from nornir.plugins.tasks.networking import netmiko_send_command, netmiko_send_c
 
 
 # Open the `ztpconfig.yaml` file to parse configuration settings.
-with open('./ztpconfig.yaml', 'r') as f:
-    config = yaml.safe_load(f)
+try:
+    with open('ztpconfig.yaml', 'r') as f:
+        config = yaml.safe_load(f)
 
-logfile = config['logfile']
-watch_dir = config['watch_dir']
-ssh_method = config['ssh_method']
-post_cfg = config['post_cfg']
-tftpaddr = config['tftpaddr']
-imgfile = config['imgfile']
-username = config['username']
-password = config['password']
+    logfile = config['logfile']
+    watch_dir = config['watch_dir']
+    ssh_method = config['ssh_method']
+    post_cfg = config['post_cfg']
+    tftpaddr = config['tftpaddr']
+    imgfile = config['imgfile']
+    username = config['username']
+    password = config['password']
 
+
+    # `Logger` class to handle logging messages to file.
+    class Logger:
+        def __init__(self, logdata):
+            logging.basicConfig(format='%(asctime)s %(message)s',
+                                datefmt='%Y/%m/%d %I:%M:%S %p',
+                                filename=logfile,
+                                level=logging.INFO)
+            logging.info(f'-- {logdata}')
+            print(f'\n{logdata}')
+
+
+    Logger(f'OK - Configuration file found (ztpconfig.yaml).')
+except FileNotFoundError:
+    print('ERROR: Configuration file not found (ztpconfig.yaml), quitting.')
+    quit()
+
+# Get contents of the configured post provisioning config file.
 if post_cfg:
-    with open('./postcfg.txt', 'r') as f:
-        postcfg = f.read()
-
-with open('./postcfg.txt', 'r') as f:
-    postcfg = f.read()
-
-
-# `Logger` class to handle logging messages to file.
-class Logger:
-    def __init__(self, logdata):
-        logging.basicConfig(format='%(asctime)s %(message)s',
-                            datefmt='%Y/%m/%d %I:%M:%S %p',
-                            filename=logfile,
-                            level=logging.INFO)
-        logging.info(f'-- {logdata}')
-        print(f'\n{logdata}')
+    try:
+        with open(post_cfg, 'r') as f:
+            postcfg = f.read()
+            Logger(f'OK - Post provisioning configuration file loaded ({post_cfg}).')
+    except FileNotFoundError:
+        Logger(f'WARNING: Post provisioning configuration file not found ({post_cfg}).')
+        post_cfg = ''
 
 
 # `Watcher` class to watch the specified directory for new files.
@@ -56,7 +66,7 @@ class Watcher:
         event_handler = Handler()
         self.observer.schedule(event_handler, watch_dir, recursive=False)
         self.observer.start()
-        Logger('ZTP Watcher started.')
+        Logger('ZTP Watcher fully loaded and running.')
         try:
             while True:
                 time.sleep(5)
@@ -92,7 +102,7 @@ class Handler(FileSystemEventHandler):
                 hostname = filename.split('_')[0]
                 hostaddr = filename.split('_')[1]
                 config = open(newfile).read()
-                ipaddr = re.search(r'ip.address.([\d\.]+)', config).group(1) or ''
+                ipaddr = re.search(r'ip\saddress\s([\d\.]+)', config).group(1) or ''
                 x = threading.Thread(target=self.test_ssh, args=(hostname, hostaddr, ipaddr))
                 x.start()
 
@@ -124,6 +134,7 @@ class Handler(FileSystemEventHandler):
                 if attempts >= maxattempts:
                     result = testconn
                     Logger(f'{hostname}: SSH verification attempts exhausted ({maxattempts}); {e}.')
+                    quit()
                 else:
                     time.sleep(retrywait)
                     continue
