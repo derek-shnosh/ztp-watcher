@@ -24,6 +24,7 @@ try:
     watch_dir = config['watch_dir']
     ssh_method = config['ssh_method']
     post_cfg = config['post_cfg']
+    cfg_push = config['cfg_push']
     tftpaddr = config['tftpaddr']
     imgfile = config['imgfile']
     username = config['username']
@@ -101,6 +102,7 @@ class Handler(FileSystemEventHandler):
                 Logger(f'New file detected: {filename}')
                 hostname = filename.split('_')[0]
                 hostaddr = filename.split('_')[1]
+                time.sleep(2)
                 config = open(newfile).read()
                 ipaddr = re.search(r'ip\saddress\s([\d\.]+)', config).group(1) or ''
                 x = threading.Thread(target=self.test_ssh, args=(hostname, hostaddr, ipaddr))
@@ -229,6 +231,12 @@ class Handler(FileSystemEventHandler):
             sw_log('Sending post provisioning configurations.')
             postcfg_list = postcfg.splitlines()
             send_config(postcfg_list)
+
+        # Push final config back to TFTP server.
+        if cfg_push:
+            Logger(f'{hostname}: Pushing final running config to TFTP server ({tftpaddr}/{cfg_push}/{hostname}.cfg).')
+            sw_log(f'Pushing final config to TFTP server ({tftpaddr}/{cfg_push}/{hostname}.cfg).')
+            send_cmd(f'copy run tftp://{tftpaddr}/{cfg_push}/{hostname}.cfg')
 
 
         # Write configuration to switch.

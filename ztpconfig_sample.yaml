@@ -12,6 +12,10 @@ ssh_method: ip
 # Enter name of file that contains post provisioning configuration.
 post_cfg: /var/git/ztp-watcher/postcfg.txt
 
+# Enter path to push the final configuration to the TFTP server after
+# completion, or leave blank to skip.
+cfg_push: /complete/
+
 # IP address of TFTP server hosting files and name of image file to copy.
 tftpaddr: 172.17.251.251                          
 imgfile: c2960x-universalk9-mz.152-4.E8.bin
