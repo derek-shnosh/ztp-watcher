@@ -102,9 +102,10 @@ class Handler(FileSystemEventHandler):
                 Logger(f'New file detected: {filename}')
                 hostname = filename.split('_')[0]
                 hostaddr = filename.split('_')[1]
-                time.sleep(2)
-                config = open(newfile).read()
-                ipaddr = re.search(r'ip\saddress\s([\d\.]+)', config).group(1) or ''
+                if ssh_method == 'parse':
+                    time.sleep(2)
+                    config = open(newfile).read()
+                    ipaddr = re.search(r'ip\saddress\s([\d\.]+)', config).group(1) or ''
                 x = threading.Thread(target=self.test_ssh, args=(hostname, hostaddr, ipaddr))
                 x.start()
 
@@ -119,8 +120,8 @@ class Handler(FileSystemEventHandler):
         retrywait = 3
         attempts = 0
         maxattempts = 10
-        conn = (hostname if ssh_method == 'dns' else 
-                hostaddr if ssh_method == 'ip' else 
+        conn = (hostname if ssh_method == 'dns' else
+                hostaddr if ssh_method == 'ip' else
                 ipaddr if ssh_method == 'parse' else '')
 
         Logger(f'{hostname}: Verifying SSH reachability to {conn} in {initialwait}s.')
