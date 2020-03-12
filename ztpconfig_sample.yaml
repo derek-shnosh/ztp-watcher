@@ -9,11 +9,12 @@ watch_dir: /etc/ztp/logs/merged/
 # Use 'parse' to parse FreeZTP merged-config file.
 ssh_method: ip
 
-# Enter name of file that contains post provisioning configuration.
+# Enter name of file that contains post provisioning configuration, or type
+# 'False' (without quotes) if there is none.
 post_cfg: /var/git/ztp-watcher/postcfg.txt
 
 # Enter path to push the final configuration to the TFTP server after
-# completion, or leave blank to skip.
+# completion, or type 'False' (without quotes).
 cfg_push: /complete/
 
 # IP address of TFTP server hosting files and name of image file to copy.
