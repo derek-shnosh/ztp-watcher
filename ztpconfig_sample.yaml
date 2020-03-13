@@ -24,3 +24,9 @@ imgfile: c2960x-universalk9-mz.152-4.E8.bin
 # Username and password used to authenticate to switches.
 username: cisco
 password: cisco
+
+# SSH testing variables.
+ssh_initialwait: 10
+ssh_timeout: 7
+ssh_retrywait: 5
+ssh_maxattempts: 15

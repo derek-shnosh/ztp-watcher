@@ -19,6 +19,7 @@ from nornir.plugins.tasks.networking import netmiko_send_command, netmiko_send_c
 try:
     with open('ztpconfig.yaml', 'r') as f:
         config = yaml.safe_load(f)
+        # globals().update(config) #Works, but linter complains about invalid vars.
 
     logfile = config['logfile']
     watch_dir = config['watch_dir']
@@ -29,6 +30,10 @@ try:
     imgfile = config['imgfile']
     username = config['username']
     password = config['password']
+    ssh_initialwait = config['ssh_initialwait']
+    ssh_timeout = config['ssh_timeout']
+    ssh_retrywait = config['ssh_retrywait']
+    ssh_maxattempts = config['ssh_maxattempts']
 
 
     # `Logger` class to handle logging messages to file.
@@ -115,36 +120,32 @@ class Handler(FileSystemEventHandler):
     # the provisioned switches.
     def test_ssh(self, hostname, hostaddr, ipaddr, port=22):
 
-        initialwait = 10
-        timeout = 7
-        retrywait = 3
-        attempts = 0
-        maxattempts = 10
         conn = (hostname if ssh_method == 'dns' else
                 hostaddr if ssh_method == 'ip' else
                 ipaddr if ssh_method == 'parse' else '')
 
-        Logger(f'{hostname}: Verifying SSH reachability to {conn} in {initialwait}s.')
-        time.sleep(initialwait)
+        Logger(f'{hostname}: Verifying SSH reachability to {conn} in {ssh_initialwait}s.')
+        time.sleep(ssh_initialwait)
         result = None
+        ssh_attempts = 0
         while result is None:
             try:
-                attempts += 1
+                ssh_attempts += 1
                 testconn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                testconn.settimeout(timeout)
+                testconn.settimeout(ssh_timeout)
                 testconn.connect((conn, port))
             except Exception as e:
-                if attempts >= maxattempts:
+                if ssh_attempts >= ssh_maxattempts:
                     result = testconn
-                    Logger(f'{hostname}: SSH verification attempts exhausted ({maxattempts}); {e}.')
+                    Logger(f'{hostname}: SSH verification attempts exhausted ({ssh_maxattempts}); {e}.')
                     quit()
                 else:
-                    time.sleep(retrywait)
+                    time.sleep(ssh_retrywait)
                     continue
             else:
                 result = testconn
                 testconn.close()
-                Logger(f'{hostname}: SSH reachability verified after {attempts} attempt(s).')
+                Logger(f'{hostname}: SSH reachability verified after {ssh_attempts} attempt(s).')
                 self.os_upgrade(hostname, conn)
 
     # `os_upgrade` function copies the .bin image via TFTP, sets the boot var,
