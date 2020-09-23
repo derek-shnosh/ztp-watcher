@@ -6,7 +6,7 @@ logfile: /etc/ztp/logs/ztpwatcher.log
 watch_dir: /etc/ztp/logs/merged/
 
 # Use `dns` or provisioning `ip` for SSH connection.
-# Use 'parse' to parse FreeZTP merged-config file.
+# Use 'parse' to parse FreeZTP merged-config file for an IP address.
 ssh_method: ip
 
 # Enter name of file that contains post provisioning configuration, or type
