@@ -15,52 +15,15 @@ from nornir import InitNornir
 from nornir.plugins.tasks.networking import netmiko_send_command, netmiko_send_config
 
 
-# Open the `ztpconfig.yaml` file to parse configuration settings.
-try:
-    with open('ztpconfig.yaml', 'r') as f:
-        config = yaml.safe_load(f)
-        # globals().update(config) #Works, but linter complains about invalid vars.
-
-    logfile = config['logfile']
-    watch_dir = config['watch_dir']
-    ssh_method = config['ssh_method']
-    post_cfg = config['post_cfg']
-    cfg_push = config['cfg_push']
-    tftpaddr = config['tftpaddr']
-    imgfile = config['imgfile']
-    username = config['username']
-    password = config['password']
-    ssh_initialwait = config['ssh_initialwait']
-    ssh_timeout = config['ssh_timeout']
-    ssh_retrywait = config['ssh_retrywait']
-    ssh_maxattempts = config['ssh_maxattempts']
-
-
-    # `Logger` class to handle logging messages to file.
-    class Logger:
-        def __init__(self, logdata):
-            logging.basicConfig(format='%(asctime)s %(message)s',
-                                datefmt='%Y/%m/%d %I:%M:%S %p',
-                                filename=logfile,
-                                level=logging.INFO)
-            logging.info(f'-- {logdata}')
-            print(f'\n{logdata}')
-
-
-    Logger(f'OK - Configuration file found (ztpconfig.yaml).')
-except FileNotFoundError:
-    print('ERROR: Configuration file not found (ztpconfig.yaml), quitting.')
-    quit()
-
-# Get contents of the configured post provisioning config file.
-if post_cfg:
-    try:
-        with open(post_cfg, 'r') as f:
-            postcfg = f.read()
-            Logger(f'OK - Post provisioning configuration file loaded ({post_cfg}).')
-    except FileNotFoundError:
-        Logger(f'WARNING: Post provisioning configuration file not found ({post_cfg}).')
-        post_cfg = ''
+# `Logger` class to handle logging messages to file.
+class Logger:
+    def __init__(self, logdata):
+        logging.basicConfig(format='%(asctime)s %(message)s',
+                            datefmt='%Y/%m/%d %I:%M:%S %p',
+                            filename=logfile,
+                            level=logging.INFO)
+        logging.info(f'-- {logdata}')
+        print(f'\n{logdata}')
 
 
 # `Watcher` class to watch the specified directory for new files.
@@ -240,7 +203,6 @@ class Handler(FileSystemEventHandler):
             sw_log(f'Pushing final config to TFTP server ({tftpaddr}/{cfg_push}/{hostname}.cfg).')
             send_cmd(f'copy run tftp://{tftpaddr}/{cfg_push}/{hostname}.cfg')
 
-
         # Write configuration to switch.
         sw_log('Writing configuration to startup.')
         send_cmd('write mem')
@@ -252,5 +214,42 @@ class Handler(FileSystemEventHandler):
 
 
 if __name__ == '__main__':
+    # Open the `ztpconfig.yaml` file to parse configuration settings.
+    try:
+        with open('ztpconfig.yaml', 'r') as f:
+            config = yaml.safe_load(f)
+            # globals().update(config) #Works, but linter complains about invalid vars.
+
+        logfile = config['logfile']
+        watch_dir = config['watch_dir']
+        ssh_method = config['ssh_method']
+        post_cfg = config['post_cfg']
+        cfg_push = config['cfg_push']
+        tftpaddr = config['tftpaddr']
+        imgfile = config['imgfile']
+        username = config['username']
+        password = config['password']
+        ssh_initialwait = config['ssh_initialwait']
+        ssh_timeout = config['ssh_timeout']
+        ssh_retrywait = config['ssh_retrywait']
+        ssh_maxattempts = config['ssh_maxattempts']
+    except FileNotFoundError:
+        print('ERROR: Configuration file not found (ztpconfig.yaml), quitting.')
+        quit()
+
+    Logger(f'OK - Configuration file found (ztpconfig.yaml).')
+
+    # Get contents of the configured post provisioning config file.
+    if post_cfg:
+        try:
+            with open(post_cfg, 'r') as f:
+                postcfg = f.read()
+                Logger(
+                    f'OK - Post provisioning configuration file loaded ({post_cfg}).')
+        except FileNotFoundError:
+            Logger(
+                f'WARNING: Post provisioning configuration file not found ({post_cfg}).')
+            post_cfg = ''
+
     w = Watcher()
     w.run()
