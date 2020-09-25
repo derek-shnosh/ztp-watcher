@@ -18,6 +18,8 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
    ztp set dhcpd INTERFACE-{dhcp_interface} imagediscoveryfile-option disable
    ```
 
+- It is imperative that your `keystore_id` value does *not* have an underscore (`_`) in it.
+
 - Custom merged-config file syntax must begin with **{{keystore_id}}_{{ipaddr}}**; e.g.
 
    `{{keystore_id}}_{{ipaddr}}_{{idarray|join("-")}}_merged.cfg`
