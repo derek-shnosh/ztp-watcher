@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Author: DS, Synergy Information Solutions, Inc.
+# Author: DS, shnosh.io
 
 
 import time
