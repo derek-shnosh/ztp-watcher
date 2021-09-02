@@ -4,3 +4,4 @@ misc
 postcfg.txt
 
 __pycache__
+.vscode/*
