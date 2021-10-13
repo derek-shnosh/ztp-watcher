@@ -43,6 +43,8 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
    ```bash
    pip install nornir
    pip install nornir-netmiko
+   pip install pyyaml
+   pip install watchdog
    ```
 
 2. Clone repo to desired location.
