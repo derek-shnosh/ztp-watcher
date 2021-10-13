@@ -73,6 +73,8 @@ class Handler(FileSystemEventHandler):
                     time.sleep(2)
                     config = open(newfile).read()
                     ipaddr = re.search(r'ip\saddress\s([\d\.]+)', config).group(1) or ''
+                else:
+                    ipaddr = None
                 x = threading.Thread(target=self.test_ssh, args=(hostname, hostaddr, ipaddr))
                 x.start()
 
