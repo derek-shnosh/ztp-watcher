@@ -38,13 +38,20 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
 
 ## Installation/Usage
 
-1. Clone repo to desired location.
+1. Install Python3 dependencies.
+
+   ```bash
+   pip install nornir
+   pip install nornir-netmiko
+   ```
+
+2. Clone repo to desired location.
 
    ```bash
    sudo git clone {URL} /var/git/ztp-watcher
    ```
 
-2. Make a copy of **ztpconfig_sample.yaml** as **ztpconfig.yaml** and edit for environment.
+3. Make a copy of **ztpconfig_sample.yaml** as **ztpconfig.yaml** and edit for environment.
 
    > See **ztpconfig_sample.yaml* file for explanation of options.
 
@@ -65,7 +72,7 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
      password: cisco
      ```
 
-3. Edit **ztp-watcher.service** systemd unit file with path.
+4. Edit **ztp-watcher.service** systemd unit file with path.
 
    ```bash
    sudo nano /var/git/ztp-watcher/ztp-watcher.service
@@ -80,7 +87,7 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
      ...
      ```
 
-4. Copy **.service** file to **/etc/systemd/system/**, then enable and start it.
+5. Copy **.service** file to **/etc/systemd/system/**, then enable and start it.
 
    ```bash
    sudo cp /var/git/ztp-watcher/ztp-watcher.service /etc/systemd/system/
