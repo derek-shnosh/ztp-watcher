@@ -11,7 +11,7 @@ import re
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from nornir import InitNornir
-from nornir_netmiko import netmiko_send_command, netmiko_send_config
+from nornir.plugins.tasks.networking import netmiko_send_command, netmiko_send_config
 
 
 # `Logger` class to handle logging messages to file.
@@ -178,7 +178,7 @@ class Handler(FileSystemEventHandler):
             copyfile = send_cmd(f'copy tftp://{tftpaddr}/{imgfile} flash:')
             copyduration = round(time.time() - copystart)
             copystatus = get_output(copyfile)
-            if '%Error' not in copystatus:
+            if 'Error' not in copystatus:
                 Logger(f'{hostname}: Image transfer completed after {copyduration}s -> set boot variable.')
                 sw_log('Image transfer complete -> set boot variable.')
                 # Set boot variable on switch.
@@ -187,7 +187,10 @@ class Handler(FileSystemEventHandler):
                 send_config(bootcmds_list)
                 Logger(f'{hostname}: Boot variable set -> write config.')
                 sw_log('Boot variable set -> write config.')
-            else:
+            elif 'OSError' in copystatus:
+                Logger(f'{hostname}: ***Unhandled prompt, put `file prompt quiet` in switch config/template.')
+                sw_log('***Unhandled prompt, put `file prompt quiet` in switch config/template.')
+            elif '%Error' in copystatus:
                 Logger(f'{hostname}: ***Image transfer failed after {copyduration}s; {copystatus}')
                 sw_log('***Image transfer failed.')
 
