@@ -72,6 +72,8 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
    ```
 
    - _**Edit values accordingly**_
+    
+     > Be sure to create the **logfile** and **watch_dir** directories as needed.
 
      ```yaml
      logfile: /etc/ztp/logs/ztpwatcher.log
