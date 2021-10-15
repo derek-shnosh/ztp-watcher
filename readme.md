@@ -14,35 +14,44 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
 
 - Ensure that FreeZTP **imagediscoveryfile-option** is set to **disable**.
 
-   ```bash
-   ztp set dhcpd INTERFACE-{dhcp_interface} imagediscoveryfile-option disable
-   ```
+  ```bash
+  ztp set dhcpd INTERFACE-{dhcp_interface} imagediscoveryfile-option disable
+  ```
 
 - It is imperative that your `keystore_id` value does *not* have an underscore (`_`) in it.
 
 - Custom merged-config file syntax must begin with **{{keystore_id}}_{{ipaddr}}**; e.g.
 
-   `{{keystore_id}}_{{ipaddr}}_{{idarray|join("-")}}_merged.cfg`
+  `{{keystore_id}}_{{ipaddr}}_{{idarray|join("-")}}_merged.cfg`
 
-   _**Full custom log file config example...**_
+  _**Full custom log file config example...**_
 
-   ```bash
-   ztp set logging merged-config-to-custom-file '/etc/ztp/logs/merged/{{keystore_id}}_{{ipaddr}}_{{idarray|join("-")}}_merged.cfg'
-   ```
+  ```bash
+  ztp set logging merged-config-to-custom-file '/etc/ztp/logs/merged/{{keystore_id}}_{{ipaddr}}_{{idarray|join("-")}}_merged.cfg'
+  ```
 
-   \*_**Suggestion**_: Disable logging merged configs to the main log file via;
+  \*_**Suggestion**_: Disable logging merged configs to the main log file via;
 
-    ```bash
-     ztp set logging merged-config-to-mainlog disable
-    ```
+  ```bash
+   ztp set logging merged-config-to-mainlog disable
+  ```
+
+- Include the following configurations in the switch template.
+
+  ```
+  ip tftp blocksize 8192
+  file prompt quiet
+  ```
+
 
 ## Installation/Usage
 
 1. Install Python3 dependencies.
 
+   > Nornir v2.5.0 is required (for now) as v3.x introduces changes to inventory management.
+
    ```bash
-   pip install nornir
-   pip install nornir-netmiko
+   pip install nornir==2.5.0
    pip install pyyaml
    pip install watchdog
    ```
@@ -108,3 +117,8 @@ _**Use-case**_: Copy IOS image .bin file to C2960S/X/XR switches post FreeZTP pr
 [freeztp]: https://github.com/PackeTsar/freeztp/
 [cisco-doc]: https://www.cisco.com/c/en/us/td/docs/solutions/Enterprise/Plug-and-Play/release/notes/pnp-release-notes16.html#pgfId-206873
 [ss-cisco-ref]: assets/images/cisco-ref.png
+
+## Feature Requests
+
+- [ ] Add option to reboot switch after upgrade.
+- [ ] Support multi-platform upgrades.
